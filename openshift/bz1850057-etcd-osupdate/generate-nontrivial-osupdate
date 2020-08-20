@@ -1,4 +1,8 @@
 #!/bin/bash
+# Given an OpenShift release image, generate a derived one which
+# overrides machine-os-content with a "large" update.
+# Example:
+# env REGISTRY_AUTH_FILE=$HOME/.docker/config.json ./generate-nontrivial-osupdate registry.svc.ci.openshift.org/ocp/release:4.6.0-0.nightly-2020-08-20-145853 registry.svc.ci.openshift.org/rhcos-devel/walters-test-update
 set -euo pipefail
 basetarget=$1
 shift

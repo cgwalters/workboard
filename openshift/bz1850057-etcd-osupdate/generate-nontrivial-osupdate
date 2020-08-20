@@ -1,0 +1,25 @@
+#!/bin/bash
+set -euo pipefail
+basetarget=$1
+shift
+dest=$1
+shift
+
+runv() {
+    (set -x
+     "$@")
+}
+
+runv oc image info "${basetarget}"
+basetargetos=$(oc adm release info --image-for=machine-os-content ${basetarget})
+echo "basetargetos: ${basetargetos}"
+
+targetos=${dest}-osupdate
+tmpd=$(mktemp -d)
+digestf=${tmpd}/digest
+cosa dev-synthesize-osupdatecontainer --percentage=80 --digestfile=${digestf} ${basetargetos} ${targetos}
+resolved_targetos=${targetos}@$(cat ${digestf})
+rm -rf ${tmpd}
+oc adm release new --from-release=${basetarget} --to-image=${dest} machine-os-content=${resolved_targetos} "$@"
+
+echo "Now test upgrade from another source image to ${dest}"
